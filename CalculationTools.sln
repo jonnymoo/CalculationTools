@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CalculationTools", "CalculationTools\CalculationTools.csproj", "{04768323-BD3D-4884-BA54-82A72C550247}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelService", "ExcelService\ExcelService.csproj", "{343F8DF8-E483-42EC-9466-2AE41EB0DFA4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{04768323-BD3D-4884-BA54-82A72C550247}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04768323-BD3D-4884-BA54-82A72C550247}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04768323-BD3D-4884-BA54-82A72C550247}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04768323-BD3D-4884-BA54-82A72C550247}.Release|Any CPU.Build.0 = Release|Any CPU
+		{343F8DF8-E483-42EC-9466-2AE41EB0DFA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{343F8DF8-E483-42EC-9466-2AE41EB0DFA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{343F8DF8-E483-42EC-9466-2AE41EB0DFA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{343F8DF8-E483-42EC-9466-2AE41EB0DFA4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E255FB98-9149-4261-8C0B-59D7C5D065FD}
+	EndGlobalSection
+EndGlobal
