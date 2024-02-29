@@ -74,27 +74,6 @@ public class Excel : IDisposable
     {
         // Save the modified spreadsheet 
         spreadsheetDocument!.Save();
-
-        // Create an instance of the Excel application
-        Microsoft.Office.Interop.Excel.Application excelApp = new();
-        excelApp.Visible = false; 
-
-        // Create a temporary file path
-        string tempFilePath = Path.GetTempFileName();
-
-        // Write memory stream content to the temporary file
-        using var fileStream = File.OpenWrite(tempFilePath);
-        stream!.CopyTo(fileStream);
-        fileStream.Close();
-
-        excelApp.Workbooks.Open(tempFilePath, UpdateLinks: Microsoft.Office.Interop.Excel.XlUpdateLinks.xlUpdateLinksAlways);
-        excelApp.ActiveWorkbook.Save();
-        excelApp.Quit();
-
-        var bytes =  File.ReadAllBytes(tempFilePath);
-        File.Delete(tempFilePath);
-        return bytes;
-
-        //return stream!.ToArray();                 
+        return stream!.ToArray();                 
     }
 }
