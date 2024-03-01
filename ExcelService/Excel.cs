@@ -3,6 +3,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using OfficeOpenXml;
 using System.IO;
 
 public class Excel : IDisposable
@@ -10,6 +11,12 @@ public class Excel : IDisposable
     private SpreadsheetDocument? spreadsheetDocument = null;
     private WorksheetPart? wsPart = null;
     private MemoryStream? stream = null;
+
+    static Excel()
+    {
+        // Set the license context to non-commercial
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+    }
     
     public Excel(string spreadsheetString, string targetWorksheetName)
     {
@@ -33,10 +40,6 @@ public class Excel : IDisposable
 
         // Retrieve a reference to the worksheet part.
         wsPart = (WorksheetPart)wbPart!.GetPartById(worksheet.Id!);
-
-        wbPart.Workbook.CalculationProperties!.ForceFullCalculation = true;
-        wbPart.Workbook.CalculationProperties!.FullCalculationOnLoad = true;
-
     }
 
     public void Dispose()
@@ -74,6 +77,10 @@ public class Excel : IDisposable
     {
         // Save the modified spreadsheet 
         spreadsheetDocument!.Save();
-        return stream!.ToArray();                 
+        using ExcelPackage package = new ExcelPackage(stream);
+        package.Workbook.Calculate();
+        using MemoryStream calculatedStream = new();
+        package.SaveAs(calculatedStream);
+        return calculatedStream.ToArray();                 
     }
 }
