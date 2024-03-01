@@ -58,7 +58,7 @@ namespace CalculationTools
                     excel.SetInput(cellName, cellValue);
                 }
 
-                var response = req.CreateResponse(HttpStatusCode.BadGateway);
+                var response = req.CreateResponse(HttpStatusCode.OK);
                 response.Headers.Add("Content-Type", "application/octet-stream");
                 response.WriteBytes(excel.Save());
                 return response;
