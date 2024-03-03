@@ -28,7 +28,7 @@ public class RunExcelCalc
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
 
         // Validate input data (replace with your validation logic)
-        if (inputData == null || !inputData?.ContainsKey("spreadsheet") || !inputData?.ContainsKey("inputs") || !inputData?.ContainsKey("inputSheetName"))
+        if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Inputs") || !inputData?.ContainsKey("SheetName"))
         {
             var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
@@ -40,15 +40,15 @@ public class RunExcelCalc
         try
         {
             // Decode base64-encoded spreadsheet
-            string spreadsheetString = inputData!.spreadsheet;
+            string spreadsheetString = inputData!.SpreadSheet;
 
             // Retrieve the target worksheet name
-            string targetWorksheetName = inputData.inputSheetName;
+            string targetWorksheetName = inputData.SheetName;
 
             using Excel excel = new(spreadsheetString, targetWorksheetName);
 
             // Input mapping
-            foreach (var item in inputData.inputs)
+            foreach (var item in inputData.Inputs)
             {
                 string cellName = item.CellName;
                 string cellValue = item.Value;
@@ -81,7 +81,7 @@ public class RunExcelCalc
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
 
         // Validate input data (replace with your validation logic)
-        if (inputData == null || !inputData?.ContainsKey("spreadsheet") || !inputData?.ContainsKey("values") || !inputData?.ContainsKey("outputSheetName"))
+        if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Values") || !inputData?.ContainsKey("SheetName"))
         {
             var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
@@ -93,17 +93,17 @@ public class RunExcelCalc
         try
         {
             // Decode base64-encoded spreadsheet
-            string spreadsheetString = inputData!.spreadsheet;
+            string spreadsheetString = inputData!.SpreadSheet;
 
             // Retrieve the target worksheet name
-            string targetWorksheetName = inputData.outputSheetName;
+            string targetWorksheetName = inputData.SheetName;
 
             using Excel excel = new(spreadsheetString, targetWorksheetName);
 
             var jsonArray = new List<Dictionary<string, string>>();
 
             // Ouput mapping
-            foreach (var item in inputData.values)
+            foreach (var item in inputData.Values)
             {
                 string cellName = item.CellName;
                 string output = excel.GetCellValue(cellName);
