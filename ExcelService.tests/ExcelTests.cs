@@ -21,7 +21,7 @@ public class ExcelTests
         Assert.Equal("DEBUG", output);
     }
 
-        [Fact]
+    [Fact]
     public void Number_test()
     {
         // Open the spread sheet and Set A3 on Input Sheet

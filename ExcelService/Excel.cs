@@ -1,15 +1,12 @@
 ﻿namespace ExcelService;
 
-using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
 using OfficeOpenXml;
 using System.IO;
 
 public class Excel : IDisposable
 {
-    private SpreadsheetDocument? spreadsheetDocument = null;
-    private WorksheetPart? wsPart = null;
+    ExcelPackage? package = null;
+    ExcelWorksheet? worksheet = null;
     private MemoryStream? stream = null;
 
     static Excel()
@@ -26,31 +23,28 @@ public class Excel : IDisposable
     {
         stream = new MemoryStream(spreadsheetBytes);
 
-        spreadsheetDocument = SpreadsheetDocument.Open(stream, true);
+        package = new ExcelPackage(stream);
 
-        // Retrieve a reference to the workbook part.
-        WorkbookPart? wbPart = spreadsheetDocument.WorkbookPart;
-
-        // Access the worksheet using the name
-        var worksheet = wbPart!.Workbook.Descendants<Sheet>()
-                        .FirstOrDefault(s => s.Name == targetWorksheetName);
+        worksheet = package.Workbook.Worksheets.FirstOrDefault(s => s.Name == targetWorksheetName);
 
         if (worksheet == null)
         {
             // Handle the case where the worksheet is not found
             throw new Exception($"Sheet '{targetWorksheetName}' not found in the spreadsheet.");
         }
-
-        // Retrieve a reference to the worksheet part.
-        wsPart = (WorksheetPart)wbPart!.GetPartById(worksheet.Id!);
-    }
+   }
 
 
     public void Dispose()
     {
-        if(spreadsheetDocument != null) 
+        if(worksheet != null) 
         {
-            spreadsheetDocument.Dispose();
+            worksheet.Dispose();
+        }
+
+        if(package != null)
+        {
+            package.Dispose();
         }
 
         if(stream != null)
@@ -63,35 +57,28 @@ public class Excel : IDisposable
     {
         var cell = GetCell(cellName);
         // Update the cell value
-        cell.DataType = new EnumValue<CellValues>(CellValues.String);
-        cell.CellValue = new CellValue(cellValue);
+        cell.SetCellValue(0,0,cellValue);
     }
 
     public string GetCellValue(string cellName)
     {
         var cell = GetCell(cellName);
-        if(cell.CellValue == null)
-        {
-            throw new Exception($"Cell '{cellName}' value not set");
-        }
-        return cell.CellValue.Text;
+        return cell.GetCellValue<string>();
     }
 
     public byte[] Save()
     {
         // Save the modified spreadsheet 
-        spreadsheetDocument!.Save();
-        using ExcelPackage package = new ExcelPackage(stream);
-        package.Workbook.Calculate();
+        package?.Workbook.Calculate();
         using MemoryStream calculatedStream = new();
-        package.SaveAs(calculatedStream);
+        package?.SaveAs(calculatedStream);
         return calculatedStream.ToArray();                 
     }
 
-    private Cell GetCell(string cellName)
+    private ExcelRangeBase GetCell(string cellName)
     {
-           // Find the cell by its address using the cell name
-        var cell = wsPart?.Worksheet?.Descendants<Cell>().FirstOrDefault(c => c.CellReference == cellName);
+        // Find the cell by its address using the cell name
+        var cell = worksheet?.Cells.FirstOrDefault(c => c.Address == cellName);
 
         if (cell != null)
         {
