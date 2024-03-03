@@ -24,7 +24,7 @@ public class RunExcelCalc
         // Parse JSON input
         var jsonString = new StreamReader(req.Body).ReadToEnd();
 
-        _logger.LogTrace(jsonString);
+        _logger.LogInformation(jsonString);
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
 
         // Validate input data (replace with your validation logic)
