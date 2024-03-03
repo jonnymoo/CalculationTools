@@ -18,11 +18,9 @@ public class RunExcelCalc
         _logger = loggerFactory.CreateLogger<RunExcelCalc>();
     }
 
-    [Function("RunExcelCalc")]
+    [Function("SetValues")]
     public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
     {
-        _logger.LogInformation("C# HTTP trigger function called.");
-
         // Parse JSON input
         var jsonString = new StreamReader(req.Body).ReadToEnd();
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
@@ -74,8 +72,6 @@ public class RunExcelCalc
     [Function("GetValues")]
     public HttpResponseData GetValues([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
     {
-        _logger.LogInformation("C# HTTP trigger function called.");
-
         // Parse JSON input
         var jsonString = new StreamReader(req.Body).ReadToEnd();
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
@@ -107,7 +103,6 @@ public class RunExcelCalc
             {
                 string cellName = item.CellName;
                 string output = excel.GetCellValue(cellName);
-                _logger.LogInformation($"Cell {cellName}, Value {output}");
 
                 // Create a dictionary object for each cell
                 var cellData = new Dictionary<string, string>();
