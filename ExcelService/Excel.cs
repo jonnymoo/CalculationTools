@@ -18,9 +18,12 @@ public class Excel : IDisposable
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
     }
     
-    public Excel(string spreadsheetString, string targetWorksheetName)
+    public Excel(string spreadsheetString, string targetWorksheetName) : this(Convert.FromBase64String(spreadsheetString), targetWorksheetName)
     {
-        byte[] spreadsheetBytes = Convert.FromBase64String(spreadsheetString);
+    }
+
+    public Excel(byte[] spreadsheetBytes, string targetWorksheetName)
+    {
         stream = new MemoryStream(spreadsheetBytes);
 
         spreadsheetDocument = SpreadsheetDocument.Open(stream, true);
@@ -42,6 +45,7 @@ public class Excel : IDisposable
         wsPart = (WorksheetPart)wbPart!.GetPartById(worksheet.Id!);
     }
 
+
     public void Dispose()
     {
         if(spreadsheetDocument != null) 
@@ -55,22 +59,22 @@ public class Excel : IDisposable
         }
     }
 
-    public void SetInput(string cellName, string cellValue)
+    public void SetCellValue(string cellName, string cellValue)
     {
-           // Find the cell by its address using the cell name
-        var cell = wsPart?.Worksheet?.Descendants<Cell>().FirstOrDefault(c => c.CellReference == cellName);
+        var cell = GetCell(cellName);
+        // Update the cell value
+        cell.DataType = new EnumValue<CellValues>(CellValues.String);
+        cell.CellValue = new CellValue(cellValue);
+    }
 
-        if (cell != null)
+    public string GetCellValue(string cellName)
+    {
+        var cell = GetCell(cellName);
+        if(cell.CellValue == null)
         {
-            // Update the cell value
-            cell.DataType = new EnumValue<CellValues>(CellValues.String);
-            cell.CellValue = new CellValue(cellValue);
-
+            throw new Exception($"Cell '{cellName}' value not set");
         }
-        else
-        {
-            throw new Exception($"Cell '{cellName}' not found in input sheet'.");
-        }
+        return cell.CellValue.Text;
     }
 
     public byte[] Save()
@@ -82,5 +86,20 @@ public class Excel : IDisposable
         using MemoryStream calculatedStream = new();
         package.SaveAs(calculatedStream);
         return calculatedStream.ToArray();                 
+    }
+
+    private Cell GetCell(string cellName)
+    {
+           // Find the cell by its address using the cell name
+        var cell = wsPart?.Worksheet?.Descendants<Cell>().FirstOrDefault(c => c.CellReference == cellName);
+
+        if (cell != null)
+        {
+            return cell;
+        }
+        else
+        {
+            throw new Exception($"Cell '{cellName}' not found in sheet");
+        }
     }
 }

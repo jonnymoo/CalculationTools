@@ -10,67 +10,132 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelService;
 
-namespace CalculationTools
+namespace CalculationTools;
+public class RunExcelCalc
 {
-    public class RunExcelCalc
-    {
-        private readonly ILogger _logger;
+    private readonly ILogger _logger;
 
-        public RunExcelCalc(ILoggerFactory loggerFactory)
+    public RunExcelCalc(ILoggerFactory loggerFactory)
+    {
+        _logger = loggerFactory.CreateLogger<RunExcelCalc>();
+    }
+
+    [Function("RunExcelCalc")]
+    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+    {
+        _logger.LogInformation("C# HTTP trigger function called.");
+
+        // Parse JSON input
+        var jsonString = new StreamReader(req.Body).ReadToEnd();
+        var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
+
+        // Validate input data (replace with your validation logic)
+        if (inputData == null || !inputData?.ContainsKey("spreadsheet") || !inputData?.ContainsKey("inputs") || !inputData?.ContainsKey("inputSheetName"))
         {
-            _logger = loggerFactory.CreateLogger<RunExcelCalc>();
+            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            response.WriteString("Invalid input data format");
+            return response;
         }
 
-        [Function("RunExcelCalc")]
-        public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        // Process the data
+        try
         {
-            _logger.LogInformation("C# HTTP trigger function called.");
+            // Decode base64-encoded spreadsheet
+            string spreadsheetString = inputData!.spreadsheet;
 
-            // Parse JSON input
-            var jsonString = new StreamReader(req.Body).ReadToEnd();
-            var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
+            // Retrieve the target worksheet name
+            string targetWorksheetName = inputData.inputSheetName;
 
-            // Validate input data (replace with your validation logic)
-            if (inputData == null || !inputData?.ContainsKey("spreadsheet") || !inputData?.ContainsKey("inputs") || !inputData?.ContainsKey("inputSheetName"))
+            using Excel excel = new(spreadsheetString, targetWorksheetName);
+
+            // Input mapping
+            foreach (var item in inputData.inputs)
             {
-                var response = req.CreateResponse(HttpStatusCode.BadGateway);
-                response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-                response.WriteString("Invalid input data format");
-                return response;
+                string cellName = item.CellName;
+                string cellValue = item.Value;
+                excel.SetCellValue(cellName, cellValue);
             }
 
-            // Process the data
-            try
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            response.Headers.Add("Content-Type", "application/octet-stream");
+            response.WriteBytes(excel.Save());
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred processing the Excel file.");
+            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            response.WriteString("Error processing data");
+            return response;
+        }
+    } 
+
+
+    [Function("GetValues")]
+    public HttpResponseData GetValues([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+    {
+        _logger.LogInformation("C# HTTP trigger function called.");
+
+        // Parse JSON input
+        var jsonString = new StreamReader(req.Body).ReadToEnd();
+        var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
+
+        // Validate input data (replace with your validation logic)
+        if (inputData == null || !inputData?.ContainsKey("spreadsheet") || !inputData?.ContainsKey("values") || !inputData?.ContainsKey("outputSheetName"))
+        {
+            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            response.WriteString("Invalid input data format");
+            return response;
+        }
+
+        // Process the data
+        try
+        {
+            // Decode base64-encoded spreadsheet
+            string spreadsheetString = inputData!.spreadsheet;
+
+            // Retrieve the target worksheet name
+            string targetWorksheetName = inputData.outputSheetName;
+
+            using Excel excel = new(spreadsheetString, targetWorksheetName);
+
+            var jsonArray = new List<Dictionary<string, string>>();
+
+            // Ouput mapping
+            foreach (var item in inputData.values)
             {
-                // Decode base64-encoded spreadsheet
-                string spreadsheetString = inputData!.spreadsheet;
+                string cellName = item.CellName;
+                string output = excel.GetCellValue(cellName);
+                _logger.LogInformation($"Cell {cellName}, Value {output}");
 
-                // Retrieve the target worksheet name
-                string targetWorksheetName = inputData.inputSheetName;
+                // Create a dictionary object for each cell
+                var cellData = new Dictionary<string, string>();
+                cellData.Add("CellName", cellName);
+                cellData.Add("Value", output);
 
-                using Excel excel = new(spreadsheetString, targetWorksheetName);
-
-                // Input mapping
-                foreach (var item in inputData.inputs)
-                {
-                    string cellName = item.CellName;
-                    string cellValue = item.Value;
-                    excel.SetInput(cellName, cellValue);
-                }
-
-                var response = req.CreateResponse(HttpStatusCode.OK);
-                response.Headers.Add("Content-Type", "application/octet-stream");
-                response.WriteBytes(excel.Save());
-                return response;
+                // Add the dictionary to the JSON array
+                jsonArray.Add(cellData);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred processing the Excel file.");
-                var response = req.CreateResponse(HttpStatusCode.BadGateway);
-                response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-                response.WriteString("Error processing data");
-                return response;
-            }
-        } 
-    }
+
+            // Convert the JSON array to a string
+            string outputJsonString = JsonConvert.SerializeObject(jsonArray);
+
+
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            response.Headers.Add("Content-Type", "application/json");
+            response.WriteString(outputJsonString);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred processing the Excel file.");
+            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
+            response.WriteString("Error processing data");
+            return response;
+        }
+    } 
 }
