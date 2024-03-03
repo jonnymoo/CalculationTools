@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ExcelService;
+using System.Web;
 
 namespace CalculationTools;
 public class RunExcelCalc
@@ -40,7 +41,7 @@ public class RunExcelCalc
         try
         {
             // Decode base64-encoded spreadsheet
-            string spreadsheetString = inputData!.SpreadSheet;
+            string spreadsheetString = HttpUtility.UrlDecode(inputData!.SpreadSheet);
 
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
@@ -91,7 +92,7 @@ public class RunExcelCalc
         try
         {
             // Decode base64-encoded spreadsheet
-            string spreadsheetString = inputData!.SpreadSheet;
+            string spreadsheetString = HttpUtility.UrlDecode(inputData!.SpreadSheet);
 
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
