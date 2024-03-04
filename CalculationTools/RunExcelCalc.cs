@@ -106,7 +106,7 @@ public class RunExcelCalc
             // Ouput mapping
             foreach (var item in inputData.Values)
             {
-                string cellName = item.CellName;
+                string cellName = item.Name;
                 string output = excel.GetCellValue(cellName);
 
                 // Create a dictionary object for each cell
