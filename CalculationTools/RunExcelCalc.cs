@@ -25,7 +25,6 @@ public class RunExcelCalc
         // Parse JSON input
         var jsonString = new StreamReader(req.Body).ReadToEnd();
 
-        _logger.LogInformation(jsonString);
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
 
         // Validate input data (replace with your validation logic)
@@ -44,7 +43,6 @@ public class RunExcelCalc
             string spreadsheetString = inputData!.SpreadSheet;
 
             spreadsheetString = spreadsheetString.Replace("&#13;&#10;","");
-_logger.LogInformation(spreadsheetString.Substring(spreadsheetString.Length-10));
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
 
@@ -53,7 +51,7 @@ _logger.LogInformation(spreadsheetString.Substring(spreadsheetString.Length-10))
             // Input mapping
             foreach (var item in inputData.Inputs)
             {
-                string cellName = item.CellName;
+                string cellName = item.Name;
                 string cellValue = item.Value;
                 excel.SetCellValue(cellName, cellValue);
             }
@@ -96,8 +94,8 @@ _logger.LogInformation(spreadsheetString.Substring(spreadsheetString.Length-10))
             // Decode base64-encoded spreadsheet
             string spreadsheetString = inputData!.SpreadSheet;
 
-            spreadsheetString = HttpUtility.UrlDecode(spreadsheetString).Replace("&#13;&#10;","");
-
+            spreadsheetString = spreadsheetString.Replace("&#13;&#10;","");
+            
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
 
