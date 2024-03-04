@@ -43,7 +43,7 @@ public class RunExcelCalc
             // Decode base64-encoded spreadsheet
             string spreadsheetString = inputData!.SpreadSheet;
 
-            spreadsheetString = HttpUtility.UrlDecode(spreadsheetString);
+            spreadsheetString = HttpUtility.UrlDecode(spreadsheetString).Replace("&#13;&#10;","");
 _logger.LogInformation(spreadsheetString);
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
@@ -96,7 +96,7 @@ _logger.LogInformation(spreadsheetString);
             // Decode base64-encoded spreadsheet
             string spreadsheetString = inputData!.SpreadSheet;
 
-            spreadsheetString = HttpUtility.UrlDecode(spreadsheetString);
+            spreadsheetString = HttpUtility.UrlDecode(spreadsheetString).Replace("&#13;&#10;","");;
 
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
