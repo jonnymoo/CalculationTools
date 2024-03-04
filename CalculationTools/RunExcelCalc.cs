@@ -44,7 +44,7 @@ public class RunExcelCalc
             string spreadsheetString = inputData!.SpreadSheet;
 
             spreadsheetString = HttpUtility.UrlDecode(spreadsheetString);
-
+_logger.LogInformation(spreadsheetString);
             // Retrieve the target worksheet name
             string targetWorksheetName = inputData.SheetName;
 
