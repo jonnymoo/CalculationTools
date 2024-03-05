@@ -30,7 +30,7 @@ public class RunExcelCalc
         // Validate input data (replace with your validation logic)
         if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Inputs") )
         {
-            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
             response.WriteString("Invalid input data format");
             return response;
@@ -70,7 +70,7 @@ public class RunExcelCalc
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred processing the Excel file.");
-            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
             response.WriteString($"Error processing data: {ex.Message}");
             return response;
@@ -88,7 +88,7 @@ public class RunExcelCalc
         // Validate input data (replace with your validation logic)
         if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Outputs"))
         {
-            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
             response.WriteString("Invalid input data format");
             return response;
@@ -135,7 +135,7 @@ public class RunExcelCalc
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred processing the Excel file.");
-            var response = req.CreateResponse(HttpStatusCode.BadGateway);
+            var response = req.CreateResponse(HttpStatusCode.BadRequest);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
             response.WriteString($"Error processing data: {ex.Message}");
             return response;
