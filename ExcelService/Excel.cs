@@ -29,12 +29,6 @@ public class Excel : IDisposable
 
     public void SetCurrentSheet(string targetWorksheetName)
     {
-        if(worksheet != null)
-        {
-            worksheet.Dispose();
-            worksheet = null;
-        }
-        
         worksheet = package?.Workbook.Worksheets.FirstOrDefault(s => s.Name == targetWorksheetName);
 
         if (worksheet == null)
@@ -47,11 +41,6 @@ public class Excel : IDisposable
 
     public void Dispose()
     {
-        if(worksheet != null) 
-        {
-            worksheet.Dispose();
-        }
-
         if(package != null)
         {
             package.Dispose();
