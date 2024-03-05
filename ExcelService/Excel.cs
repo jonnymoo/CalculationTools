@@ -15,24 +15,34 @@ public class Excel : IDisposable
         ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
     }
     
-    public Excel(string spreadsheetString, string targetWorksheetName) : this(Convert.FromBase64String(spreadsheetString), targetWorksheetName)
+    public Excel(string spreadsheetString) : this(Convert.FromBase64String(spreadsheetString))
     {
     }
 
-    public Excel(byte[] spreadsheetBytes, string targetWorksheetName)
+    public Excel(byte[] spreadsheetBytes)
     {
         stream = new MemoryStream(spreadsheetBytes);
 
         package = new ExcelPackage(stream);
 
-        worksheet = package.Workbook.Worksheets.FirstOrDefault(s => s.Name == targetWorksheetName);
+    }
+
+    public void SetCurrentSheet(string targetWorksheetName)
+    {
+        if(worksheet != null)
+        {
+            worksheet.Dispose();
+            worksheet = null;
+        }
+        
+        worksheet = package?.Workbook.Worksheets.FirstOrDefault(s => s.Name == targetWorksheetName);
 
         if (worksheet == null)
         {
             // Handle the case where the worksheet is not found
             throw new Exception($"Sheet '{targetWorksheetName}' not found in the spreadsheet.");
         }
-   }
+    }
 
 
     public void Dispose()

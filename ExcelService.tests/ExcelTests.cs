@@ -6,7 +6,8 @@ public class ExcelTests
     public void Set_Input_test()
     {
         // Open the spread sheet and Set A1 on Input Sheet
-        using Excel excel = new(spreadsheetString,"Input Sheet");
+        using Excel excel = new(spreadsheetString);
+        excel.SetCurrentSheet("Input Sheet");
 
         excel.SetCellValue("A1", "DEBUG");
 
@@ -14,7 +15,8 @@ public class ExcelTests
         var array = excel.Save();
 
         // Open the saved calc - we expect A1 in the Ouput Sheet to be DEBUG now
-        using Excel outputExcel = new Excel(array, "Output Sheet");
+        using Excel outputExcel = new Excel(array);
+        outputExcel.SetCurrentSheet("Output Sheet");
 
         string output = outputExcel.GetCellValue("A1");
 
@@ -25,7 +27,8 @@ public class ExcelTests
     public void Number_test()
     {
         // Open the spread sheet and Set A3 on Input Sheet
-        using Excel excel = new(spreadsheetString,"Input Sheet");
+        using Excel excel = new(spreadsheetString);
+        excel.SetCurrentSheet("Input Sheet");
 
         excel.SetCellValue("A3", "50");
 
@@ -33,8 +36,8 @@ public class ExcelTests
         var array = excel.Save();
 
         // Open the saved calc - we expect A3 in the Ouput Sheet to be 51
-        using Excel outputExcel = new Excel(array, "Output Sheet");
-
+        using Excel outputExcel = new Excel(array);
+        outputExcel.SetCurrentSheet("Output Sheet");
         string output = outputExcel.GetCellValue("A3");
 
         Assert.Equal("51", output);
@@ -44,8 +47,8 @@ public class ExcelTests
     public void Get_value_test()
     {
         // Open the spread sheet and Set A3 on Input Sheet
-        using Excel excel = new(spreadsheetString,"Input Sheet");
-
+        using Excel excel = new(spreadsheetString);
+        excel.SetCurrentSheet("Input Sheet");
         string output  = excel.GetCellValue("A1");
 
         Assert.Equal("I am an input", output);

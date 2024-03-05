@@ -28,7 +28,7 @@ public class RunExcelCalc
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
 
         // Validate input data (replace with your validation logic)
-        if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Inputs") || !inputData?.ContainsKey("SheetName"))
+        if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Inputs") )
         {
             var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
@@ -43,17 +43,23 @@ public class RunExcelCalc
             string spreadsheetString = inputData!.SpreadSheet;
 
             spreadsheetString = spreadsheetString.Replace("&#13;&#10;","");
-            // Retrieve the target worksheet name
-            string targetWorksheetName = inputData.SheetName;
-
-            using Excel excel = new(spreadsheetString, targetWorksheetName);
+            
+            using Excel excel = new(spreadsheetString);
 
             // Input mapping
-            foreach (var item in inputData.Inputs)
+            foreach (var sheet in inputData.Inputs)
             {
-                string cellName = item.Name;
-                string cellValue = item.Value;
-                excel.SetCellValue(cellName, cellValue);
+                // Retrieve the target worksheet name
+                string targetWorksheetName = sheet.Name;
+                var cells = sheet.Value;
+                excel.SetCurrentSheet(targetWorksheetName);
+
+                foreach(var cell in cells)
+                {
+                    string cellName = cell.Name;
+                    string cellValue = cell.Value;
+                    excel.SetCellValue(cellName, cellValue);
+                }
             }
 
             var response = req.CreateResponse(HttpStatusCode.OK);
@@ -80,7 +86,7 @@ public class RunExcelCalc
         var inputData = JsonConvert.DeserializeObject<dynamic>(jsonString);
 
         // Validate input data (replace with your validation logic)
-        if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Values") || !inputData?.ContainsKey("SheetName"))
+        if (inputData == null || !inputData?.ContainsKey("SpreadSheet") || !inputData?.ContainsKey("Outputs"))
         {
             var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
@@ -96,30 +102,29 @@ public class RunExcelCalc
 
             spreadsheetString = spreadsheetString.Replace("&#13;&#10;","");
             
-            // Retrieve the target worksheet name
-            string targetWorksheetName = inputData.SheetName;
-
-            using Excel excel = new(spreadsheetString, targetWorksheetName);
-
-            var jsonArray = new List<Dictionary<string, string>>();
+            using Excel excel = new(spreadsheetString);
 
             // Ouput mapping
-            foreach (var item in inputData.Values)
+            var sheetData = new Dictionary<string, Dictionary<string, string>>();
+            foreach (var sheet in inputData.Outputs)
             {
-                string cellName = item.Name;
-                string output = excel.GetCellValue(cellName);
+                // Retrieve the target worksheet name
+                string targetWorksheetName = sheet.Name;
+                var cells = sheet.Value;
+                excel.SetCurrentSheet(targetWorksheetName);
 
-                // Create a dictionary object for each cell
                 var cellData = new Dictionary<string, string>();
-                cellData.Add("CellName", cellName);
-                cellData.Add("Value", output);
+                sheetData.Add(targetWorksheetName, cellData);
 
-                // Add the dictionary to the JSON array
-                jsonArray.Add(cellData);
+                foreach(var cell in cells)
+                {
+                    string cellName = cell.Name;
+                    string output = excel.GetCellValue(cellName);
+                    cellData.Add(cell.Name, output);
+                }
             }
 
-            // Convert the JSON array to a string
-            string outputJsonString = JsonConvert.SerializeObject(jsonArray);
+           string outputJsonString = JsonConvert.SerializeObject(sheetData);
 
 
             var response = req.CreateResponse(HttpStatusCode.OK);
