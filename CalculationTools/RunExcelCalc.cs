@@ -72,7 +72,7 @@ public class RunExcelCalc
             _logger.LogError(ex, "An error occurred processing the Excel file.");
             var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-            response.WriteString("Error processing data");
+            response.WriteString($"Error processing data: {ex.Message}");
             return response;
         }
     } 
@@ -137,7 +137,7 @@ public class RunExcelCalc
             _logger.LogError(ex, "An error occurred processing the Excel file.");
             var response = req.CreateResponse(HttpStatusCode.BadGateway);
             response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
-            response.WriteString("Error processing data");
+            response.WriteString($"Error processing data: {ex.Message}");
             return response;
         }
     } 
